@@ -207,7 +207,7 @@ jobs:
             generate_release_notes: false
             body: Electron client for the unofficial (openHAB)[https://www.openhab.org] add-on (HAB Speaker v${{ steps.get_version.outputs.VERSION }})[https://github.com/GiviMAD/openhab-addons/releases/tag/habspeaker-${{ steps.get_version.outputs.VERSION }}]
             files: |
-              HABSpeaker_Linux_x86_64/${{ steps.get_version.outputs.VERSION }}/HABSpeaker_${{ steps.get_version.outputs.VERSION }}_linux_x64.AppImage
+              HABSpeaker_Linux_x86_64/${{ steps.get_version.outputs.VERSION }}/HABSpeaker_${{ steps.get_version.outputs.VERSION }}_linux_x86_64.AppImage
               HABSpeaker_Linux_Arm64/${{ steps.get_version.outputs.VERSION }}/HABSpeaker_${{ steps.get_version.outputs.VERSION }}_linux_arm64.AppImage
               HABSpeaker_macOS_x86_64/${{ steps.get_version.outputs.VERSION }}/HABSpeaker_${{ steps.get_version.outputs.VERSION }}_macOS_x64.dmg
               HABSpeaker_macOS_Arm64/${{ steps.get_version.outputs.VERSION }}/HABSpeaker_${{ steps.get_version.outputs.VERSION }}_macOS_arm64.dmg
