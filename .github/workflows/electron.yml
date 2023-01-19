@@ -36,6 +36,7 @@ jobs:
         with:
           name: HABSpeaker_Linux_x86_64
           path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.AppImage
+          retention-days: 5
 
   build-app-debian-arm64:
     runs-on: ubuntu-22.04
@@ -82,6 +83,7 @@ jobs:
         with:
           name: HABSpeaker_Linux_Arm64
           path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.AppImage
+          retention-days: 5
 
   build-app-macos-x86_64:
     runs-on: macos-latest
@@ -114,6 +116,7 @@ jobs:
         with:
           name: HABSpeaker_macOS_x86_64
           path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.dmg
+          retention-days: 5
 
   build-app-macos-arm64:
     runs-on: macos-latest
@@ -146,6 +149,7 @@ jobs:
         with:
           name: HABSpeaker_macOS_Arm64
           path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.dmg
+          retention-days: 5
 
   build-app-windows-x86_64:
     runs-on: windows-latest
@@ -183,6 +187,7 @@ jobs:
         with:
           name: HABSpeaker_Windows_x86_64
           path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.exe
+          retention-days: 5
 
   create_release:
     if: startsWith(github.ref, 'refs/tags/')
