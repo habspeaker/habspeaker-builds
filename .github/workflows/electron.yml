@@ -1,4 +1,4 @@
-name: Electron app build
+name: Desktop app build
 on:
   push:
     tags: [ "*.*.*" ]
@@ -208,11 +208,11 @@ jobs:
           id: create_release
           with:
             tag_name: release_${{ steps.get_version.outputs.VERSION }}
-            name: HAB Speaker Electron App v${{ steps.get_version.outputs.VERSION }}
+            name: HAB Speaker Desktop App v${{ steps.get_version.outputs.VERSION }}
             draft: false
             prerelease: false
             generate_release_notes: false
-            body: Electron client for the unofficial [openHAB](https://www.openhab.org) add-on [HAB Speaker v${{ steps.get_version.outputs.VERSION }}](https://github.com/GiviMAD/openhab-addons/releases/tag/habspeaker-${{ steps.get_version.outputs.VERSION }})
+            body: Desktop client for the unofficial [openHAB](https://www.openhab.org) add-on [HAB Speaker v${{ steps.get_version.outputs.VERSION }}](https://github.com/GiviMAD/openhab-addons/releases/tag/habspeaker-${{ steps.get_version.outputs.VERSION }})
             files: |
               HABSpeaker_Linux_x86_64/${{ steps.get_version.outputs.VERSION }}/HABSpeaker_${{ steps.get_version.outputs.VERSION }}_linux_x86_64.AppImage
               HABSpeaker_Linux_Arm64/${{ steps.get_version.outputs.VERSION }}/HABSpeaker_${{ steps.get_version.outputs.VERSION }}_linux_arm64.AppImage
