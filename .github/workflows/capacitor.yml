@@ -1,0 +1,193 @@
+name: Mobile app build
+on:
+  push:
+    tags: [ "*.*.*" ]
+  workflow_dispatch:
+      inputs:
+        version:
+          description: 'Version'
+          required: true
+          default: '0.0.0'
+          type: string
+jobs:
+  build-app-android:
+    runs-on: ubuntu-22.04
+    steps: 
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        name: Install NodeJS
+        with:
+          node-version: 16
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: 11
+          distribution: zulu
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+      - name: Get HAB Speaker version
+        id: get_version
+        run: |
+          EVENT_NAME=$(echo "${{ github.event_name }}")
+          echo "trigger name $EVENT_NAME"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "Get version from inputs"
+            USE_VERSION=$(echo "${{ github.event.inputs.version }}")
+          else
+              echo "Get version from tag name"
+            USE_VERSION=$(echo $GITHUB_REF | cut -d / -f 3)
+          fi
+          echo "Building version $USE_VERSION"
+          echo "VERSION=$USE_VERSION" >> $GITHUB_OUTPUT
+      - name: Checkout HABSpeaker
+        uses: actions/checkout@v3
+        with:
+          repository: GiviMAD/openhab-addons
+          ref: refs/tags/habspeaker-${{ steps.get_version.outputs.VERSION }}
+          path: marketplace-addons
+      - name: Build with capacitor
+        env:
+          ANDROID_KS_BASE64: ${{ secrets.ANDROID_KS_BASE64 }}
+          ANDROID_KS_ALIAS: ${{ secrets.KS_ALIAS }}
+          ANDROID_KS_PASS: ${{ secrets.KS_PASSWORD }}
+          ANDROID_SERVICE_ACCOUNT_BASE64: ${{ secrets.ANDROID_SERVICE_ACCOUNT_BASE64 }}
+        run: |
+          cd ./marketplace-addons/bundles/org.openhab.voice.habspeaker/web
+          echo -e "$ANDROID_KS_BASE64" | base64 -d > android_ks
+          # echo -e "$ANDROID_SERVICE_ACCOUNT_BASE64" | base64 -d > android/app/deploy-credentials.json
+          PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
+          echo "build version $PACKAGE_VERSION"
+          npm ci
+          npm run build:capacitor
+          npm run sync:capacitor
+          cd android
+          chmod +x ./gradlew
+          ./gradlew bundleRelease
+          ls -R app/build/outputs/bundle/release/
+          jarsigner -keystore $(cd ../ && pwd)/android_ks -storepass "$ANDROID_KS_PASS" -keypass "$ANDROID_KS_PASS" app/build/outputs/bundle/release/app-release.aab "$ANDROID_KS_ALIAS"
+          # ./gradlew publishBundle --artifact-dir app/build/outputs/bundle/release --track "production" --release-name "HABSpeaker_$PACKAGE_VERSION"
+      - name: Convert aab to apk
+        id: convert_aab
+        uses: mukeshsolanki/bundletool-action@v1.0.0
+        with:
+          aabFile: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/android/app/build/outputs/bundle/release/app-release.aab
+          base64Keystore: ${{ secrets.ANDROID_KS_BASE64 }}
+          keystorePassword: ${{ secrets.KS_PASSWORD }}
+          keystoreAlias: ${{ secrets.KS_ALIAS }}
+          keyPassword: ${{ secrets.KS_PASSWORD }}
+      - name: Upload artifact Android apk
+        uses: actions/upload-artifact@v3
+        with:
+          name: HABSpeaker_Android
+          path: ${{ steps.convert_aab.outputs.apkPath }}
+          retention-days: 5
+
+  # build-app-ios: # TODO build and deploy ios demo
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
+  #     - name: Get version from tag name
+  #       id: get_version
+  #       run: echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
+  #     - name: Checkout HABSpeaker
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: GiviMAD/openhab-addons
+  #         ref: refs/tags/habspeaker-${{ steps.get_version.outputs.VERSION }}
+  #         path: marketplace-addons
+  #     - name: Install the Apple certificate and provisioning profile
+  #       env:
+  #         BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+  #         P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+  #         BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+  #         KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+  #       run: |
+  #         # create variables
+  #         CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+  #         PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+  #         KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+  #         # import certificate and provisioning profile from secrets
+  #         echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+  #         echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
+
+  #         # create temporary keychain
+  #         security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+  #         security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+  #         security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+  #         # import certificate to keychain
+  #         security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+  #         security list-keychain -d user -s $KEYCHAIN_PATH
+
+  #         # apply provisioning profile
+  #         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+  #         cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+  #     - name: Setup Node.js environment
+  #       uses: actions/setup-node@v2.4.1
+  #     - name: Build/Deploy App
+  #       env:
+  #         APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
+  #         APPLE_DEPLOY_PASSWORD: ${{ secrets.APPLE_DEPLOY_PASSWORD }}
+  #         PROVISIONING_PROFILE_SPECIFIER: habspeaker
+  #       run: |
+  #         cd ./marketplace-addons/bundles/org.openhab.voice.habspeaker/web
+  #         npm ci
+  #         npm run build:capacitor
+  #         cd ios/App
+  #         echo "- STEP BUILD -"
+  #         xcodebuild -workspace App.xcworkspace -scheme App clean CODE_SIGN_IDENTITY="iPhone Distribution" CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_SPECIFIER" archive -configuration release -sdk iphoneos -archivePath App.xcarchive
+  #         cd ../
+  #         echo "- STEP PACKAGE -"
+  #         xcodebuild -exportArchive -archivePath "$(pwd)/App/App.xcarchive" -exportOptionsPlist "$(pwd)/ExportOptions.plist" -exportPath "$(pwd)/"
+  #         echo "- STEP VALIDATE -"
+  #         xcrun altool --validate-app -f App.ipa -t ios -u "$APPLE_ACCOUNT" -p "$APPLE_DEPLOY_PASSWORD"
+  #         echo "- STEP UPLOAD -"
+  #         xcrun altool --upload-app -f App.ipa -t ios -u "$APPLE_ACCOUNT" -p "$APPLE_DEPLOY_PASSWORD"
+
+  create_release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build-app-android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+        - uses: actions/checkout@v3
+        - name: Get HAB Speaker version
+          id: get_version
+          run: |
+            EVENT_NAME=$(echo "${{ github.event_name }}")
+            echo "trigger name $EVENT_NAME"
+            if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+              echo "Get version from inputs"
+              USE_VERSION=$(echo "${{ github.event.inputs.version }}")
+            else
+                echo "Get version from tag name"
+              USE_VERSION=$(echo $GITHUB_REF | cut -d / -f 3)
+            fi
+            echo "Building version $USE_VERSION"
+            echo "VERSION=$USE_VERSION" >> $GITHUB_OUTPUT
+        - uses: actions/download-artifact@v3
+        - name: Check tree
+          run: ls -R
+        - name: Rename APK
+          run: |
+            cp HABSpeaker_Android/app-release.apk HABSpeaker_Android/HABSpeaker_${{ steps.get_version.outputs.VERSION }}.apk
+        - name: Check tree again
+          run: ls -R
+        - name: release
+          uses: softprops/action-gh-release@v1
+          id: create_release
+          with:
+            tag_name: release_mobile_${{ steps.get_version.outputs.VERSION }}
+            name: HAB Speaker Mobile App v${{ steps.get_version.outputs.VERSION }}
+            draft: false
+            prerelease: false
+            generate_release_notes: false
+            body: Mobile client for the unofficial [openHAB](https://www.openhab.org) add-on [HAB Speaker v${{ steps.get_version.outputs.VERSION }}](https://github.com/GiviMAD/openhab-addons/releases/tag/habspeaker-${{ steps.get_version.outputs.VERSION }})
+            files: |
+              HABSpeaker_Android/HABSpeaker_${{ steps.get_version.outputs.VERSION }}.apk
+          env:
+            GITHUB_TOKEN: ${{ github.token }}
