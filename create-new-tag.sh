@@ -9,7 +9,7 @@ PREV_TAG=$(curl -s -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Ver
 if [ -z "$PREV_TAG" ]; then
     echo "creating tag $TAG_NAME"
     git tag $TAG_NAME
-    git push --tags
+    git push origin $TAG_NAME
 else
     echo "release for version $TAG_NAME already exists"
     exit 1
