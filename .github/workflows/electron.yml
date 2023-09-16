@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v3
         name: Install NodeJS
         with:
-          node-version: 16
+          node-version: 18
       - name: Get version from tag name
         id: get_version
         run: echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
@@ -60,7 +60,7 @@ jobs:
   #     - uses: actions/setup-node@v3
   #       name: Install NodeJS
   #       with:
-  #         node-version: 16
+  #         node-version: 18
   #     - name: Get version from tag name
   #       id: get_version
   #       run: echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
@@ -97,7 +97,7 @@ jobs:
       - uses: actions/setup-node@v3
         name: Install NodeJS
         with:
-          node-version: 16
+          node-version: 18
       - name: Get version from tag name
         id: get_version
         run: echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
@@ -130,7 +130,7 @@ jobs:
       - uses: actions/setup-node@v3
         name: Install NodeJS
         with:
-          node-version: 16
+          node-version: 18
       - name: Get version from tag name
         id: get_version
         run: echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
@@ -167,7 +167,7 @@ jobs:
       - uses: actions/setup-node@v3
         name: Install NodeJS
         with:
-          node-version: 16
+          node-version: 18
       - name: Get version from tag name
         id: get_version
         shell: bash
