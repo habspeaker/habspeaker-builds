@@ -8,11 +8,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Install Rust
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup-init.sh
-          sh rustup-init.sh -y --default-toolchain none
-          rustup target add x86_64-unknown-linux-gnu
       - uses: actions/setup-node@v3
         name: Install NodeJS
         with:
@@ -28,8 +23,6 @@ jobs:
           path: marketplace-addons
       - name: Build Electron App
         run: |
-          sudo apt update
-          sudo apt install -y build-essential libasound2-dev
           ./marketplace-addons/bundles/org.openhab.voice.habspeaker/web/tools/build-electron-linux-appimage.sh amd64
       - name: Upload artifact debian x86_64
         uses: actions/upload-artifact@v3
@@ -38,62 +31,37 @@ jobs:
           path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.AppImage
           retention-days: 5
 
-  # build-app-debian-arm64:
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Setup arm64
-  #       run: |
-  #         echo "adding arm64"
-  #         sudo dpkg --add-architecture arm64
-  #         echo "deb [arch=arm64] http://ports.ubuntu.com/ jammy main multiverse universe" | sudo tee -a /etc/apt/sources.list
-  #         echo "deb [arch=arm64] http://ports.ubuntu.com/ jammy-security main multiverse universe" | sudo tee -a /etc/apt/sources.list
-  #         echo "deb [arch=arm64] http://ports.ubuntu.com/ jammy-backports main multiverse universe" | sudo tee -a /etc/apt/sources.list
-  #         echo "deb [arch=arm64] http://ports.ubuntu.com/ jammy-updates main multiverse universe" | sudo tee -a /etc/apt/sources.list
-  #         sudo apt update || true
-  #         sudo apt install -y pkg-config build-essential libasound2-dev:arm64 alsa-tools:arm64 gcc-10-aarch64-linux-gnu gcc-aarch64-linux-gnu gcc-9-aarch64-linux-gnu-base cpp-aarch64-linux-gnu cpp-9-aarch64-linux-gnu
-  #     - name: Install Rust
-  #       run: |
-  #         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup-init.sh
-  #         sh rustup-init.sh -y --default-toolchain none
-  #         rustup target add aarch64-unknown-linux-gnu
-  #     - uses: actions/setup-node@v3
-  #       name: Install NodeJS
-  #       with:
-  #         node-version: 18
-  #     - name: Get version from tag name
-  #       id: get_version
-  #       run: echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
-  #     - name: Checkout HABSpeaker
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: GiviMAD/openhab-addons
-  #         ref: refs/tags/habspeaker-${{ steps.get_version.outputs.VERSION }}
-  #         path: marketplace-addons
-  #     - name: Build Electron App
-  #       run: |
-  #         mkdir -p ~/.cargo
-  #         echo "[target.aarch64-unknown-linux-gnu]" > ~/.cargo/config
-  #         echo "linker = \"aarch64-linux-gnu-gcc\"" >> ~/.cargo/config
-  #         export PKG_CONFIG_ALLOW_CROSS=1
-  #         export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig/
-  #         ./marketplace-addons/bundles/org.openhab.voice.habspeaker/web/tools/build-electron-linux-appimage.sh arm64
-  #     - name: Upload artifact debian arm64
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: HABSpeaker_Linux_Arm64
-  #         path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.AppImage
-  #         retention-days: 5
+  build-app-debian-arm64:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        name: Install NodeJS
+        with:
+          node-version: 18
+      - name: Get version from tag name
+        id: get_version
+        run: echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
+      - name: Checkout HABSpeaker
+        uses: actions/checkout@v3
+        with:
+          repository: GiviMAD/openhab-addons
+          ref: refs/tags/habspeaker-${{ steps.get_version.outputs.VERSION }}
+          path: marketplace-addons
+      - name: Build Electron App
+        run: |
+          ./marketplace-addons/bundles/org.openhab.voice.habspeaker/web/tools/build-electron-linux-appimage.sh arm64
+      - name: Upload artifact debian arm64
+        uses: actions/upload-artifact@v3
+        with:
+          name: HABSpeaker_Linux_Arm64
+          path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.AppImage
+          retention-days: 5
 
   build-app-macos-x86_64:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install Rust
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup-init.sh
-          sh rustup-init.sh -y --default-toolchain none
-          rustup target add x86_64-apple-darwin
       - uses: actions/setup-node@v3
         name: Install NodeJS
         with:
@@ -122,11 +90,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install Rust
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup-init.sh
-          sh rustup-init.sh -y --default-toolchain none
-          rustup target add aarch64-apple-darwin
       - uses: actions/setup-node@v3
         name: Install NodeJS
         with:
@@ -155,15 +118,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install Rust using win.rustup.rs
-        run: |
-          # Disable the download progress bar which can cause perf issues
-          $ProgressPreference = "SilentlyContinue"
-          Invoke-WebRequest https://win.rustup.rs/ -OutFile rustup-init.exe
-          .\rustup-init.exe -y --default-host=x86_64-pc-windows-msvc --default-toolchain=none
-          del rustup-init.exe
-          rustup target add x86_64-pc-windows-msvc
-        shell: powershell
       - uses: actions/setup-node@v3
         name: Install NodeJS
         with:
