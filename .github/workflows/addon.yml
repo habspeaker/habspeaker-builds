@@ -43,12 +43,12 @@ jobs:
       - name: Maven Build
         run: |
           cd ./marketplace-addons
-          mvn clean install -pl :org.openhab.voice.habspeaker
+          mvn clean install -pl :org.openhab.binding.habspeaker
       - name: Upload add-on jar
         uses: actions/upload-artifact@v3
         with:
           name: HABSpeaker_Addon
-          path: marketplace-addons/bundles/org.openhab.voice.habspeaker/target/org.openhab.voice.habspeaker-*-SNAPSHOT.jar
+          path: marketplace-addons/bundles/org.openhab.binding.habspeaker/target/org.openhab.binding.habspeaker-*-SNAPSHOT.jar
           retention-days: 5
   create_release:
     if: startsWith(github.ref, 'refs/tags/')
@@ -86,6 +86,6 @@ jobs:
             generate_release_notes: false
             body: Add-on [HABSpeaker v${{ steps.get_version.outputs.VERSION }}](https://github.com/GiviMAD/openhab-addons/releases/tag/habspeaker-${{ steps.get_version.outputs.VERSION }}) for [OpenHAB](https://www.openhab.org)
             files: |
-              HABSpeaker_Addon/org.openhab.voice.habspeaker-*-SNAPSHOT.jar
+              HABSpeaker_Addon/org.openhab.binding.habspeaker-*-SNAPSHOT.jar
           env:
             GITHUB_TOKEN: ${{ github.token }}

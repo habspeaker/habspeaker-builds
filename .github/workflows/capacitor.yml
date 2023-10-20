@@ -53,7 +53,7 @@ jobs:
           ANDROID_KS_PASS: ${{ secrets.KS_PASSWORD }}
           ANDROID_SERVICE_ACCOUNT_BASE64: ${{ secrets.ANDROID_SERVICE_ACCOUNT_BASE64 }}
         run: |
-          cd ./marketplace-addons/bundles/org.openhab.voice.habspeaker/web
+          cd ./marketplace-addons/bundles/org.openhab.binding.habspeaker/web
           echo -e "$ANDROID_KS_BASE64" | base64 -d > android_ks
           # echo -e "$ANDROID_SERVICE_ACCOUNT_BASE64" | base64 -d > android/app/deploy-credentials.json
           PACKAGE_VERSION=$(node -p -e "require('./package.json').version")
@@ -71,7 +71,7 @@ jobs:
         id: convert_aab
         uses: mukeshsolanki/bundletool-action@v1.0.0
         with:
-          aabFile: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/android/app/build/outputs/bundle/release/app-release.aab
+          aabFile: marketplace-addons/bundles/org.openhab.binding.habspeaker/web/android/app/build/outputs/bundle/release/app-release.aab
           base64Keystore: ${{ secrets.ANDROID_KS_BASE64 }}
           keystorePassword: ${{ secrets.KS_PASSWORD }}
           keystoreAlias: ${{ secrets.KS_ALIAS }}
@@ -133,7 +133,7 @@ jobs:
   #         APPLE_DEPLOY_PASSWORD: ${{ secrets.APPLE_DEPLOY_PASSWORD }}
   #         PROVISIONING_PROFILE_SPECIFIER: habspeaker
   #       run: |
-  #         cd ./marketplace-addons/bundles/org.openhab.voice.habspeaker/web
+  #         cd ./marketplace-addons/bundles/org.openhab.binding.habspeaker/web
   #         npm ci
   #         npm run build:capacitor
   #         cd ios/App

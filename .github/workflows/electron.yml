@@ -23,12 +23,12 @@ jobs:
           path: marketplace-addons
       - name: Build Electron App
         run: |
-          ./marketplace-addons/bundles/org.openhab.voice.habspeaker/web/tools/build-electron-linux-appimage.sh amd64
+          ./marketplace-addons/bundles/org.openhab.binding.habspeaker/web/tools/build-electron-linux-appimage.sh amd64
       - name: Upload artifact debian x86_64
         uses: actions/upload-artifact@v3
         with:
           name: HABSpeaker_Linux_x86_64
-          path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.AppImage
+          path: marketplace-addons/bundles/org.openhab.binding.habspeaker/web/electron-release/**/HABSpeaker_*.AppImage
           retention-days: 5
 
   build-app-debian-arm64:
@@ -50,12 +50,12 @@ jobs:
           path: marketplace-addons
       - name: Build Electron App
         run: |
-          ./marketplace-addons/bundles/org.openhab.voice.habspeaker/web/tools/build-electron-linux-appimage.sh arm64
+          ./marketplace-addons/bundles/org.openhab.binding.habspeaker/web/tools/build-electron-linux-appimage.sh arm64
       - name: Upload artifact debian arm64
         uses: actions/upload-artifact@v3
         with:
           name: HABSpeaker_Linux_Arm64
-          path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.AppImage
+          path: marketplace-addons/bundles/org.openhab.binding.habspeaker/web/electron-release/**/HABSpeaker_*.AppImage
           retention-days: 5
 
   build-app-macos-x86_64:
@@ -78,12 +78,12 @@ jobs:
       - name: Build Electron App
         run: |
           export DYLD_LIBRARY_PATH=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/
-          ./marketplace-addons/bundles/org.openhab.voice.habspeaker/web/tools/build-electron-macos-dmg.sh amd64
+          ./marketplace-addons/bundles/org.openhab.binding.habspeaker/web/tools/build-electron-macos-dmg.sh amd64
       - name: Upload artifact macos x86_64
         uses: actions/upload-artifact@v3
         with:
           name: HABSpeaker_macOS_x86_64
-          path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.dmg
+          path: marketplace-addons/bundles/org.openhab.binding.habspeaker/web/electron-release/**/HABSpeaker_*.dmg
           retention-days: 5
 
   build-app-macos-arm64:
@@ -106,12 +106,12 @@ jobs:
       - name: Build Electron App
         run: |
           export DYLD_LIBRARY_PATH=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/
-          ./marketplace-addons/bundles/org.openhab.voice.habspeaker/web/tools/build-electron-macos-dmg.sh arm64
+          ./marketplace-addons/bundles/org.openhab.binding.habspeaker/web/tools/build-electron-macos-dmg.sh arm64
       - name: Upload artifact macos arm64
         uses: actions/upload-artifact@v3
         with:
           name: HABSpeaker_macOS_Arm64
-          path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.dmg
+          path: marketplace-addons/bundles/org.openhab.binding.habspeaker/web/electron-release/**/HABSpeaker_*.dmg
           retention-days: 5
 
   build-app-windows-x86_64:
@@ -134,13 +134,13 @@ jobs:
           path: marketplace-addons
       - name: Build Electron App
         run: |
-          .\marketplace-addons\bundles\org.openhab.voice.habspeaker\web\tools\build-electron-windows-exe.ps1
+          .\marketplace-addons\bundles\org.openhab.binding.habspeaker\web\tools\build-electron-windows-exe.ps1
         shell: powershell
       - name: Upload artifact windows x86_64
         uses: actions/upload-artifact@v3
         with:
           name: HABSpeaker_Windows_x86_64
-          path: marketplace-addons/bundles/org.openhab.voice.habspeaker/web/electron-release/**/HABSpeaker_*.exe
+          path: marketplace-addons/bundles/org.openhab.binding.habspeaker/web/electron-release/**/HABSpeaker_*.exe
           retention-days: 5
 
   create_release:
