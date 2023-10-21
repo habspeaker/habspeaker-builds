@@ -35,7 +35,7 @@ jobs:
             echo "Get version from inputs"
             USE_VERSION=$(echo "${{ github.event.inputs.version }}")
           else
-              echo "Get version from tag name"
+            echo "Get version from tag name"
             USE_VERSION=$(echo $GITHUB_REF | cut -d / -f 3)
           fi
           echo "Building version $USE_VERSION"
@@ -65,7 +65,7 @@ jobs:
           chmod +x ./gradlew
           ./gradlew bundleRelease
           ls -R app/build/outputs/bundle/release/
-          jarsigner -keystore $(cd ../ && pwd)/android_ks -storepass "$ANDROID_KS_PASS" -keypass "$ANDROID_KS_PASS" app/build/outputs/bundle/release/app-release.aab "$ANDROID_KS_ALIAS"
+          # jarsigner -keystore $(cd ../ && pwd)/android_ks -storepass "$ANDROID_KS_PASS" -keypass "$ANDROID_KS_PASS" app/build/outputs/bundle/release/app-release.aab "$ANDROID_KS_ALIAS"
           # ./gradlew publishBundle --artifact-dir app/build/outputs/bundle/release --track "production" --release-name "HABSpeaker_$PACKAGE_VERSION"
       - name: Convert aab to apk
         id: convert_aab
@@ -170,13 +170,6 @@ jobs:
             echo "Building version $USE_VERSION"
             echo "VERSION=$USE_VERSION" >> $GITHUB_OUTPUT
         - uses: actions/download-artifact@v3
-        - name: Check tree
-          run: ls -R
-        - name: Rename APK
-          run: |
-            cp HABSpeaker_Android/app-release.apk HABSpeaker_Android/HABSpeaker_${{ steps.get_version.outputs.VERSION }}.apk
-        - name: Check tree again
-          run: ls -R
         - name: release
           uses: softprops/action-gh-release@v1
           id: create_release
@@ -188,6 +181,6 @@ jobs:
             generate_release_notes: false
             body: The [HAB Speaker v${{ steps.get_version.outputs.VERSION }}](https://github.com/GiviMAD/openhab-addons/releases/tag/habspeaker-${{ steps.get_version.outputs.VERSION }}) web UI as a mobile app.
             files: |
-              HABSpeaker_Android/HABSpeaker_${{ steps.get_version.outputs.VERSION }}.apk
+              HABSpeaker_Android/app-release.apk
           env:
             GITHUB_TOKEN: ${{ github.token }}
